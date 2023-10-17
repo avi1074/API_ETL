@@ -7,6 +7,7 @@ from database import engine
 from departments import Department
 from jobs import Jobs
 from employees import Employee
+from sql_report import employees_quarter, mean_hired 
 
 app = FastAPI()
 
@@ -47,6 +48,14 @@ async def upload_employees_csv(file: UploadFile = None):
 async def upload_departments_csv(file: UploadFile = None):
     return await process_csv(file, "departments", ['id', 'departments'])
 
+@app.post("/query/departments-above-mean-2021/")
+async def departments_above_mean_2021():
+    return await process_custom_query(mean_hired)
+
+@app.post("/query/employees-count-2021/")
+async def employees_count_2021():
+    return await process_custom_query(employees_quarter)
+
 def find_one(table_name: str, record_id: int):
     SessionLocal = sessionmaker(bind=engine)
     db = SessionLocal()
@@ -77,6 +86,15 @@ async def process_get(table_name: str):
     SessionLocal = sessionmaker(bind=engine)
     db = SessionLocal()
     result = db.execute(text(f'SELECT * FROM {table_name}'))
+    rows = result.fetchall()
+    dict_representation = [row._asdict() for row in rows]
+    db.close()
+    return dict_representation
+
+async def process_custom_query(query:str):
+    SessionLocal = sessionmaker(bind=engine)
+    db = SessionLocal()
+    result = db.execute(text(f'{query}'))
     rows = result.fetchall()
     dict_representation = [row._asdict() for row in rows]
     db.close()
