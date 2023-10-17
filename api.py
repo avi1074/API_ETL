@@ -1,14 +1,13 @@
-from fastapi import FastAPI, UploadFile, HTTPException
-from jobs import Jobs
-from io import StringIO
+from fastapi import FastAPI, UploadFile, HTTPException, Depends
 import pandas as pd
+from io import StringIO
+from sqlalchemy.orm import sessionmaker
+from database import engine
+from models import departments, jobs, employees
 
 app = FastAPI()
 
-# Dummy database
-jobs = []
-
-
+SessionLocal = sessionmaker(bind=engine)
 
 @app.get("/")
 def read_root():
@@ -31,20 +30,35 @@ def get_job(job_id: int):
     else:
         return {"message": "Job not found"}
 
-@app.post("/uploadcsv/")
-async def upload_csv(file: UploadFile = None):
+
+@app.post("/uploadcsv/{table_name}")
+async def upload_csv(table_name: str, file: UploadFile = None):
+    if table_name not in ["departments", "jobs", "employees"]:
+        raise HTTPException(status_code=400, detail="Invalid table name")
+
     if file and file.filename.endswith('.csv'):
-        # Read the file content
         content = await file.read()
-        
-        # Convert the content to a pandas dataframe
         try:
             df = pd.read_csv(StringIO(content.decode('utf-8')))
-            # Here you can do any operation with the dataframe, e.g., save to a database
+            df.to_sql(table_name, engine, if_exists='append', index=False)
             return {"message": f"File '{file.filename}' uploaded successfully!", "data": df.to_dict()}
-        
         except Exception as e:
             raise HTTPException(status_code=400, detail="Failed to parse CSV file.")
-    
     else:
         raise HTTPException(status_code=400, detail="Invalid file or file type. Only .csv files are supported.")
+
+
+@app.post("/batch-insert/{table_name}")
+async def batch_insert(table_name: str, data: list):
+    if table_name not in ["departments", "jobs", "employees"]:
+        raise HTTPException(status_code=400, detail="Invalid table name")
+
+    if not data or len(data) > 1000:
+        raise HTTPException(status_code=400, detail="Data should be between 1 and 1000 rows.")
+
+    with SessionLocal() as session:
+        table = globals().get(table_name)
+        session.bulk_insert_mappings(table, data)
+        session.commit()
+    return {"message": f"Inserted {len(data)} rows in {table_name}"}
+
