@@ -1,5 +1,12 @@
-from pydantic import BaseModel
+from sqlalchemy import Column, Integer, String
+from sqlalchemy.ext.declarative import declarative_base
 
-class Deparments(BaseModel):
-    id: int
-    deparment: str
+
+Base = declarative_base()
+
+
+class Department(Base):
+    __tablename__ = 'departments'
+
+    id = Column(Integer, primary_key=True)
+    departments = Column(String)

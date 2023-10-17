@@ -1,5 +1,12 @@
-from pydantic import BaseModel
+from sqlalchemy import Column, Integer, String
+from sqlalchemy.ext.declarative import declarative_base
 
-class Jobs(BaseModel):
-    id: int
-    job: str
+
+Base = declarative_base()
+
+
+class Jobs(Base):
+    __tablename__ = 'jobs'
+
+    id = Column(Integer, primary_key=True)
+    job = Column(String)
