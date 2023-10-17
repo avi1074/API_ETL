@@ -3,11 +3,11 @@ from sqlalchemy import exc, text
 from sqlalchemy.orm import sessionmaker
 import pandas as pd
 from io import StringIO
-from database import engine
-from departments import Department
-from jobs import Jobs
-from employees import Employee
-from sql_report import employees_quarter, mean_hired 
+from db.database import engine
+from models.departments import Department
+from models.jobs import Jobs
+from models.employees import Employee
+from db.sql_report import employees_quarter, mean_hired 
 
 app = FastAPI()
 
