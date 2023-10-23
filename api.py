@@ -7,10 +7,11 @@ from db.database import engine
 from models.departments import Department
 from models.jobs import Jobs
 from models.employees import Employee
+from mangum import Mangum
 from db.sql_report import employees_quarter, mean_hired 
 
 app = FastAPI()
-
+handler = Mangum(app)
 
 @app.get("/")
 def read_root():
