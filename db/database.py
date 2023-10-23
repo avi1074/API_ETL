@@ -1,6 +1,11 @@
 from sqlalchemy import create_engine, MetaData
+import os
 
-DATABASE_URL = "postgresql://postgresql:globant_challenge2023@database-globant.cxxinsslhf6k.us-east-1.rds.amazonaws.com:5432/apidatabase"
+user = os.environ.get("USER")
+pwd = os.environ.get("PWD")
+host = os.environ.get("HOST")
+
+DATABASE_URL = f"postgresql://{user}:{pwd}@{host}:5432/apidatabase"
 
 engine = create_engine(DATABASE_URL)
 metadata = MetaData()
