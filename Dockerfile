@@ -1,9 +1,18 @@
-FROM public.ecr.aws/lambda/python:3.10
-# Copy function code
-COPY . ${LAMBDA_TASK_ROOT}
-# Install the function's dependencies using file requirements.txt
-# from your project folder.
+# Use the official fastapi uvicorn image as the base image
+FROM tiangolo/uvicorn-gunicorn-fastapi:python3.9
+
+# Set the working directory in the docker
+WORKDIR /usr/src/app
+
+# Copy the dependencies file to the working directory
 COPY requirements.txt .
-RUN pip3 install -r requirements.txt - target "${LAMBDA_TASK_ROOT}" -U - no-cache-dir
-# Set the CMD to your handler (could also be done as a parameter override outside of the Dockerfile)
-CMD [ "app.handler" ]
+
+# Install any dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the content of the local src directory to the working directory
+COPY . .
+
+# Command to run on container start
+CMD [ "api.handler" ]
+
