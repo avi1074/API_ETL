@@ -8,6 +8,7 @@ from models.departments import Department
 from models.jobs import Jobs
 from models.employees import Employee
 from mangum import Mangum
+import uvicorn
 from db.sql_report import employees_quarter, mean_hired 
 
 app = FastAPI()
@@ -115,3 +116,7 @@ async def process_csv(file: UploadFile, table_name: str, column_names: list):
             raise HTTPException(status_code=400, detail=f"Failed to parse CSV file. Error: {str(e)}")
     else:
         raise HTTPException(status_code=400, detail="Invalid file or file type. Only .csv files are supported.")
+    
+if __name__ == "__main__":
+   uvicorn.run(app, host="0.0.0.0", port=8080)
+    
